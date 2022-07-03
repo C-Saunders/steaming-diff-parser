@@ -1,0 +1,7 @@
+diff --git a/foo/a.txt b/foo/a.txt
+deleted file mode 100644
+index 257cc56..0000000
+--- a/foo/a.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-foo
