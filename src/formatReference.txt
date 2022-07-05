@@ -1,0 +1,49 @@
+# Base Format
+### start of a FileDiff
+^diff --git a/<path> b/<path>
+
+### file created or deleted - optional
+new file mode ##### | delete file mode #####
+
+### SHAs
+^index oldRevSha..newRevSha( fileMode)?
+
+### file path updates
+^--- oldPath
+^+++ newPath
+oldPath /dev/null = add
+newPath /dev/null = delete
+rename from foo.js = rename // might also be "copy", or that might be hg only?
+otherwise = modify
+
+OR one of these
+
+Binary files /dev/null and b/foo/test.pdf differ
+Binary files a/foo/test.pdf and b/foo/test.pdf differ
+Binary files a/foo/test.pdf and /dev/null differ
+
+### unified diff line
+match = /^@@\s+-(?<oldStart>[0-9]+)(?:,(?<oldLineCount>[0-9]+))?\s+\+(?<newStart>[0-9]+)(?:,(?<newLineCount>[0-9]+))?\s+@@$/
+  oldStart: match.groups['oldStart']
+  oldLineCount: match.groups['oldLineCount'] ?? 1
+  newStart: match.groups['newStart']
+  newLineCount: match.groups['newLineCount'] ?? 1
+
+### content
+^+ = insert
+^- = delete
+^<space> = normal
+^\ = "\ No newline at end of file"
+
+---- moved file format ----
+diff --git ...
+similarity index #%
+rename from ...
+rename to ...
+(if there are changes, it continues with the ^index line from above)
+
+---- file mode changed format -----
+diff --git ...
+old mode 100644
+new mode 100755
+(if there are changes, it continues with the ^index line from above)

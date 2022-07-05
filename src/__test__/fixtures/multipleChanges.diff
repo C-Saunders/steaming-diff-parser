@@ -1,0 +1,21 @@
+diff --git a/bar/a.txt b/bar/a.txt
+index 257cc56..5716ca5 100644
+--- a/bar/a.txt
++++ b/bar/a.txt
+@@ -1 +1 @@
+-foo
++bar
+diff --git a/foo/a.txt b/foo/a.txt
+index 257cc56..3bd1f0e 100644
+--- a/foo/a.txt
++++ b/foo/a.txt
+@@ -1 +1,2 @@
+ foo
++bar
+diff --git a/foo/hello.txt b/foo/hello.txt
+new file mode 100644
+index 0000000..45b983b
+--- /dev/null
++++ b/foo/hello.txt
+@@ -0,0 +1 @@
++hi
