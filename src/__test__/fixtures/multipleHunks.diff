@@ -1,0 +1,55 @@
+diff --git a/src/index.ts b/src/index.ts
+index 80e08be..bc3b328 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -11,12 +11,12 @@ export interface Change {
+ }
+ 
+ export interface Hunk {
+-  content: string
+-  oldStart: number
+-  newStart: number
+-  oldLines: number
+-  newLines: number
+-  changes: Change[]
++  content?: string
++  oldStart?: number
++  newStart?: number
++  oldLineCount?: number
++  newLineCount?: number
++  changes?: Change[]
+ }
+ 
+ export interface FileDiff {
+@@ -36,6 +36,10 @@ export interface FileDiff {
+   newEndingNewLine: boolean
+ }
+ 
++const similarityRegex = /^similarity index (?<percent>\d+)%$/
++const unifiedDiffRegex =
++  /^@@\s+-(?<oldStart>[0-9]+)(?:,(?<oldLineCount>[0-9]+))?\s+\+(?<newStart>[0-9]+)(?:,(?<newLineCount>[0-9]+))?\s+@@/
++
+ export async function* run(
+   input: readline.Interface
+ ): AsyncGenerator<Partial<FileDiff> | undefined, void> {
+@@ -51,6 +55,20 @@ export async function* run(
+       currentFileDiff = {}
+     }
+     assert(currentFileDiff)
++
++    if (similarityRegex.test(line)) {
++      const matches = similarityRegex.exec(line)
++      currentFileDiff.similarity = Number(matches?.groups?.percent)
++    } else if (unifiedDiffRegex.test(line)) {
++      currentFileDiff.hunks = currentFileDiff.hunks ?? []
++      const matches = unifiedDiffRegex.exec(line)
++      currentFileDiff.hunks.push({
++        oldStart: Number(matches?.groups?.oldStart),
++        oldLineCount: Number(matches?.groups?.oldLineCount ?? 1),
++        newStart: Number(matches?.groups?.oldStart),
++        newLineCount: Number(matches?.groups?.oldStart ?? 1),
++      })
++    }
+   }
+ 
+   yield currentFileDiff

@@ -1,3 +1,5 @@
+http://git-scm.com/docs/git-diff#_generating_patch_text_with_p
+
 # Base Format
 ### start of a FileDiff
 ^diff --git a/<path> b/<path>
@@ -13,7 +15,8 @@ new file mode ##### | delete file mode #####
 ^+++ newPath
 oldPath /dev/null = add
 newPath /dev/null = delete
-rename from foo.js = rename // might also be "copy", or that might be hg only?
+(rename|copy) from foo.js = rename
+(rename|copy) to foo.js = rename
 otherwise = modify
 
 OR one of these

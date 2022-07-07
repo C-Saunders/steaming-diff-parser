@@ -2,7 +2,7 @@
   "name": "streaming-diff-parser",
   "version": "0.0.1",
   "description": "Streaming parser for git diffs.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": "Charlie Saunders <charlieasaunders@gmail.com>",
   "license": "MIT",
   "private": false,
