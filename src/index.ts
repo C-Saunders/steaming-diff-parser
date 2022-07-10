@@ -62,18 +62,20 @@ function cleanPath(path: string): string {
 const hunkHeaderRegex =
   /^@@\s+-(?<oldStart>[0-9]+)(?:,(?<oldLineCount>[0-9]+))?\s+\+(?<newStart>[0-9]+)(?:,(?<newLineCount>[0-9]+))? @@(?: (?<header>.*))?$/
 
-function assertComplete(fileDiff: Partial<FileDiff>): fileDiff is FileDiff {
+function assertComplete(fileDiff: Partial<FileDiff>): FileDiff {
   assert(fileDiff.oldPath !== undefined)
   assert(fileDiff.newPath !== undefined)
   assert(fileDiff.isBinary !== undefined)
   assert(fileDiff.type !== undefined)
   assert(fileDiff.trailingNewline !== undefined)
-  return true
+  // the TypeScript compiler doesn't narrow to this type, so we'll cast it here
+  // after making the above assertions
+  return fileDiff as FileDiff
 }
 
 export async function* parse(
   input: readline.Interface
-): AsyncGenerator<Partial<FileDiff> | undefined, void> {
+): AsyncGenerator<FileDiff | undefined, void> {
   let currentFileDiff: Partial<FileDiff> | undefined
   // we need to track the line numbers for old and new separately
   let oldLineNumber: number | undefined
@@ -83,8 +85,7 @@ export async function* parse(
     // start of new FileDiff, so yield if we have anything and reset
     if (fileDiffHeaderRegex.test(line)) {
       if (currentFileDiff !== undefined) {
-        assertComplete(currentFileDiff)
-        yield currentFileDiff
+        yield assertComplete(currentFileDiff)
       }
 
       const matches = fileDiffHeaderRegex.exec(line)
@@ -292,14 +293,11 @@ export async function* parse(
   if (currentFileDiff === undefined) {
     yield undefined
   } else {
-    assertComplete(currentFileDiff)
-    yield currentFileDiff
+    yield assertComplete(currentFileDiff)
   }
 }
 
-export async function parseAll(
-  input: readline.Interface
-): Promise<Partial<FileDiff>[]> {
+export async function parseAll(input: readline.Interface): Promise<FileDiff[]> {
   const results = []
   for await (const output of parse(input)) {
     if (output !== undefined) {
