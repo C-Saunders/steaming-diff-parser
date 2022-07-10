@@ -32,7 +32,7 @@ index 80e08be..bc3b328 100644
  export async function* run(
    input: readline.Interface
  ): AsyncGenerator<Partial<FileDiff> | undefined, void> {
-@@ -51,6 +55,20 @@ export async function* run(
+@@ -51,6 +55,11 @@ export async function* run(
        currentFileDiff = {}
      }
      assert(currentFileDiff)
@@ -40,15 +40,6 @@ index 80e08be..bc3b328 100644
 +    if (similarityRegex.test(line)) {
 +      const matches = similarityRegex.exec(line)
 +      currentFileDiff.similarity = Number(matches?.groups?.percent)
-+    } else if (unifiedDiffRegex.test(line)) {
-+      currentFileDiff.hunks = currentFileDiff.hunks ?? []
-+      const matches = unifiedDiffRegex.exec(line)
-+      currentFileDiff.hunks.push({
-+        oldStart: Number(matches?.groups?.oldStart),
-+        oldLineCount: Number(matches?.groups?.oldLineCount ?? 1),
-+        newStart: Number(matches?.groups?.oldStart),
-+        newLineCount: Number(matches?.groups?.oldStart ?? 1),
-+      })
 +    }
    }
  

@@ -39,6 +39,8 @@ export type FileDiff = {
   newTrailingNewline: boolean
 }
 
+const fileDiffHeaderRegex = /^diff --git a\/(?<oldPath>\S+) b\/(?<newPath>\S+)$/
+
 const similarityRegex = /^similarity index (?<percent>\d+)%$/
 const dissimilarityRegex = /^dissimilarity index (?<percent>\d+)%$/
 
@@ -71,7 +73,7 @@ function assertComplete(fileDiff: Partial<FileDiff>): fileDiff is FileDiff {
   return true
 }
 
-export async function* run(
+export async function* parse(
   input: readline.Interface
 ): AsyncGenerator<Partial<FileDiff> | undefined, void> {
   let currentFileDiff: Partial<FileDiff> | undefined
@@ -81,14 +83,19 @@ export async function* run(
 
   for await (const line of input) {
     // start of new FileDiff, so yield if we have anything and reset
-    if (line.startsWith('diff --git')) {
+    if (fileDiffHeaderRegex.test(line)) {
       if (currentFileDiff !== undefined) {
         assertComplete(currentFileDiff)
         yield currentFileDiff
       }
 
+      const matches = fileDiffHeaderRegex.exec(line)
+      const { oldPath, newPath } = matches?.groups ?? {}
+
       currentFileDiff = {
         type: 'modify',
+        oldPath,
+        newPath,
         isBinary: false,
         oldTrailingNewline: true,
         newTrailingNewline: true,
@@ -296,10 +303,17 @@ export async function* run(
   }
 }
 
-async function consume(input: readline.Interface): Promise<void> {
-  for await (const output of run(input)) {
-    console.log(JSON.stringify(output, null, '  '))
+export async function parseAll(
+  input: readline.Interface
+): Promise<Partial<FileDiff>[]> {
+  const results = []
+  for await (const output of parse(input)) {
+    if (output !== undefined) {
+      results.push(output)
+    }
   }
+
+  return results
 }
 
 if (require.main === module) {
@@ -308,7 +322,7 @@ if (require.main === module) {
     output: process.stdout,
     terminal: false,
   })
-  consume(rl)
-    .then(() => console.log('---'))
+  parseAll(rl)
+    .then(r => console.log(JSON.stringify(r, null, '  ')))
     .catch(e => console.error(e))
 }
