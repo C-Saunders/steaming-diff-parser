@@ -31,9 +31,46 @@ const results: FileDiff[] = await parseAll(input)
 ```
 
 ## Understanding the Output
-[This Stack Overflow answer](https://stackoverflow.com/a/2530012) has a nice description of the parts of a git diff.
+[This Stack Overflow answer](https://stackoverflow.com/a/2530012) has a nice description of the parts of a git diff. The type definitions and a labeled example are below.
+```ts
+export type Change =
+  | {
+      content: string
+      type: 'add' | 'remove'
+      lineNumber?: number
+    }
+  | {
+      content: string
+      type: 'unchanged'
+      oldLineNumber: number
+      newLineNumber: number
+    }
 
+export type Hunk = {
+  header?: string
+  oldStartLineNumber?: number
+  newStartLineNumber?: number
+  oldLineCount?: number
+  newLineCount?: number
+  changes: Change[]
+}
+
+export type FileDiff = {
+  hunks?: Hunk[]
+  oldFileMode?: string
+  newFileMode?: string
+  similarity?: number
+  oldBlobObjectName?: string
+  newBlobObjectName?: string
+  oldPath: string
+  newPath: string
+  isBinary: boolean
+  type: 'add' | 'delete' | 'modify' | 'rename' | 'copy'
+  trailingNewline: 'present' | 'missing' | 'added' | 'removed'
+}
 ```
+
+```diff
 diff --git a/bar/a.txt b/bar/a.txt # diff --git a/<oldPath> b/<newPath> - start of a new FileDiff
 index 257cc56..5716ca5 100644 # index <oldBlobObjectName>..<newBlobObjectName> <old and new fileMode>
 --- a/bar/a.txt # a/<oldPath>
