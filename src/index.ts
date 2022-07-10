@@ -35,8 +35,7 @@ export type FileDiff = {
   newPath: string
   isBinary: boolean
   type: 'add' | 'delete' | 'modify' | 'rename' | 'copy'
-  oldTrailingNewline: boolean
-  newTrailingNewline: boolean
+  trailingNewline: 'present' | 'missing' | 'added' | 'removed'
 }
 
 const fileDiffHeaderRegex = /^diff --git a\/(?<oldPath>\S+) b\/(?<newPath>\S+)$/
@@ -68,8 +67,7 @@ function assertComplete(fileDiff: Partial<FileDiff>): fileDiff is FileDiff {
   assert(fileDiff.newPath !== undefined)
   assert(fileDiff.isBinary !== undefined)
   assert(fileDiff.type !== undefined)
-  assert(fileDiff.oldTrailingNewline !== undefined)
-  assert(fileDiff.newTrailingNewline !== undefined)
+  assert(fileDiff.trailingNewline !== undefined)
   return true
 }
 
@@ -97,8 +95,7 @@ export async function* parse(
         oldPath,
         newPath,
         isBinary: false,
-        oldTrailingNewline: true,
-        newTrailingNewline: true,
+        trailingNewline: 'present',
       }
 
       continue
@@ -281,14 +278,11 @@ export async function* parse(
       // 'unchanged' = the trailing newline is unchanged (still missing)
       const previous = currentHunk.changes[currentHunk.changes.length - 1]
       if (previous.type === 'remove') {
-        currentFileDiff.oldTrailingNewline = false
-        currentFileDiff.newTrailingNewline = true
+        currentFileDiff.trailingNewline = 'added'
       } else if (previous.type === 'add') {
-        currentFileDiff.oldTrailingNewline = true
-        currentFileDiff.newTrailingNewline = false
+        currentFileDiff.trailingNewline = 'removed'
       } else {
-        currentFileDiff.oldTrailingNewline = false
-        currentFileDiff.newTrailingNewline = false
+        currentFileDiff.trailingNewline = 'missing'
       }
 
       continue
