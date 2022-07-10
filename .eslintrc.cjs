@@ -15,4 +15,7 @@ module.exports = {
     "plugin:@typescript-eslint/strict",
     "plugin:prettier/recommended"
   ],
+  rules: {
+    "@typescript-eslint/consistent-type-definitions": ["error", "type"]
+  }
 };
