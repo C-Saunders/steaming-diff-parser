@@ -3,7 +3,7 @@ Streaming parsing for git diffs.
 
 ## Usage
 
-### Using an async generator
+### Using an async iterator
 ```ts
 import { parse } from 'streaming-diff-parser'
 
@@ -69,6 +69,7 @@ export type FileDiff = {
   trailingNewline: 'present' | 'missing' | 'added' | 'removed'
 }
 ```
+Comments were added to this diff, starting with #
 
 ```diff
 diff --git a/bar/a.txt b/bar/a.txt # diff --git a/<oldPath> b/<newPath> - start of a new FileDiff
